@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarpZone Premium AI Website Redesigner — SaaS Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS & Lucide Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PayPal SDK Sandbox -->
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    boxShadow: {
+                        'glow-indigo': '0 0 30px -5px rgba(99, 102, 241, 0.25)',
+                        'glow-emerald': '0 0 30px -5px rgba(16, 185, 129, 0.25)',
+                        'glow-rose': '0 0 30px -5px rgba(244, 63, 94, 0.25)',
+                        'glow-amber': '0 0 30px -5px rgba(245, 158, 11, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0b0f19;
+            background-image: radial-gradient(circle at 50% -20%, #1e1b4b, #0b0f19 80%);
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-input {
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-input:focus {
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 15px -3px rgba(99, 102, 241, 0.3);
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scan-line {
+            animation: scan 3s linear infinite;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+    <!-- Header / Navigasi -->
+    <header class="border-b border-slate-800/80 sticky top-0 z-50 bg-[#0b0f19]/80 backdrop-blur-md">
+        <div class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">WarpZone</span>
+                    <span class="text-xs block text-indigo-400 font-medium tracking-widest uppercase">Redesigner Pro</span>
+                </div>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-6 text-sm text-slate-400 font-medium">
+                <a href="#workspace" class="hover:text-white transition">Workspace</a>
+                <a href="#dashboard" class="hover:text-white transition hidden" id="navDashboardLink">Dashboard Pro</a>
+                <a href="#billing" class="hover:text-white transition">Beli Neuron</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <!-- Status Premium Balance Widget -->
+                <div id="premiumNeuronWidget" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 text-xs font-semibold">
+                    <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+                    <span>Pro Balance: <span id="premiumNeuronText" class="text-white font-mono">0</span> <span class="text-slate-500 font-normal">Neurons</span></span>
+                </div>
+
+                <!-- Global Dynamic Free Neuron Badge -->
+                <div id="globalNeuronWidget" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-semibold">
+                    <i data-lucide="zap" id="globalNeuronIcon" class="w-4 h-4 text-amber-400"></i>
+                    <span>Kuota Free: <span id="globalNeuronText" class="text-white font-mono">10,000</span> <span class="text-slate-500">Neurons</span></span>
+                </div>
+                
+                <!-- Github Login / Profile Action -->
+                <div id="authContainer">
+                    <button id="btnGithubLogin" onclick="handleGithubLogin()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-xs font-semibold text-white transition active:scale-95">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                        <span>Login Pro (GitHub)</span>
+                    </button>
+                    <div id="userProfileBadge" class="hidden flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-400 flex items-center justify-center font-bold text-xs" id="userInitial">G</div>
+                        <button onclick="handleLogout()" class="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl transition" title="Log Out">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Panel -->
+    <section id="workspace" class="py-12 container mx-auto px-4 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <!-- Panel Kiri: Form Kontrol -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <form id="redesignForm" class="glass-panel rounded-3xl p-6 md:p-8 shadow-glow-indigo flex flex-col justify-between h-full space-y-6">
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-2">
+                                <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                                    <i data-lucide="terminal" class="w-5 h-5"></i>
+                                </div>
+                                <h2 class="text-lg font-bold text-white">Redesign Terminal</h2>
+                            </div>
+                            <button type="button" id="btnSync" onclick="fetchNeuronUsage(true)" class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition" title="Sinkronisasi Sisa Kuota">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Endpoint API Cloudflare Worker</label>
+                                <input type="url" id="apiEndpointInput" required value="https://ai-redesign.harisudahmalam.workers.dev" 
+                                    class="w-full glass-input rounded-xl px-4 py-3 text-sm text-slate-300 font-mono focus:outline-none">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Target Website URL</label>
+                                <div class="relative">
+                                    <input type="url" id="urlInput" required placeholder="https://daffadevhosting.github.io" 
+                                        class="w-full glass-input rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 focus:outline-none">
+                                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                                        <i data-lucide="globe" class="w-4 h-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meter Neuron -->
+                        <div class="mt-8 space-y-3 border-t border-slate-900 pt-6">
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Sistem Meter Kuota</h3>
+                            
+                            <div id="terminalNeuronWidget" class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3 transition-all duration-300">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400 flex items-center gap-1.5">
+                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-400"></i> Penggunaan Harian Gratis
+                                    </span>
+                                    <span id="terminalNeuronPercent" class="font-bold font-mono text-indigo-400">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-900">
+                                    <div id="terminalNeuronBar" class="bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400 h-full rounded-full transition-all duration-700 w-0"></div>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono">
+                                    <span id="terminalNeuronUsed">0 Neurons Terpakai</span>
+                                    <span>Limit: 10,000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-900">
+                        <button type="submit" id="btnSubmit" 
+                            class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/20 transition duration-200 flex items-center justify-center gap-2 active:scale-[0.98]">
+                            <i data-lucide="wand-2" class="w-5 h-5"></i>
+                            <span>Mulai Desain Ulang AI</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Panel Kanan: Previewer Real -->
+            <div class="lg:col-span-7">
+                <div class="glass-panel rounded-3xl overflow-hidden h-[580px] flex flex-col relative" id="previewContainer">
+                    <div class="bg-slate-950/60 px-6 py-4 border-b border-slate-900 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="flex gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            </span>
+                            <span class="text-xs font-mono text-slate-400 px-3 py-1 rounded bg-slate-900 border border-slate-800" id="previewUrlLabel">localhost:3000</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <!-- Premium Save to R2 Button -->
+                            <button id="btnSaveToCloud" onclick="saveProjectToCloud()" class="hidden px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition" title="Simpan ke Dashboard Cloud">
+                                <i data-lucide="cloud-lightning" class="w-4 h-4"></i> Simpan ke Cloud (Pro)
+                            </button>
+                            <button id="btnCopy" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition disabled:opacity-30" disabled title="Salin Kode HTML">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                            <button id="btnOpen" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition disabled:opacity-30" disabled title="Buka di Tab Baru">
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow relative bg-slate-950">
+                        <!-- Layar 1: Placeholder -->
+                        <div id="screenPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mb-4">
+                                <i data-lucide="monitor" class="w-8 h-8 animate-pulse"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-white">Menunggu Target Website</h3>
+                            <p class="text-xs text-slate-500 max-w-sm mt-2">Masukkan URL target, mulailah berinovasi bersama desainer AI masa depan.</p>
+                        </div>
+
+                        <!-- Layar 2: Loading Animasi -->
+                        <div id="screenLoading" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-8 z-20 hidden">
+                            <div class="w-24 h-24 rounded-3xl border border-indigo-500/30 flex items-center justify-center relative overflow-hidden mb-6 shadow-glow-indigo">
+                                <div class="absolute inset-x-0 top-0 h-0.5 bg-indigo-400 scan-line shadow-[0_0_15px_rgba(99,102,241,1)]"></div>
+                                <i data-lucide="sparkles" class="w-10 h-10 text-indigo-400 animate-pulse"></i>
+                            </div>
+                            <h3 class="text-md font-bold text-white mb-2" id="loadingTitle">Menginisialisasi Engine...</h3>
+                            <div class="w-64 bg-slate-900 h-1.5 rounded-full overflow-hidden mb-4">
+                                <div class="bg-indigo-500 h-full w-0 transition-all duration-300" id="progressBar"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 font-mono text-center max-w-sm" id="loadingLogs">> Siap memproses desain...</p>
+                        </div>
+
+                        <!-- Layar 3: Error -->
+                        <div id="screenError" class="absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-8 z-30 hidden">
+                            <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-5">
+                                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Terjadi Kesalahan</h3>
+                            <p class="text-xs text-slate-400 mt-2 text-center max-w-md" id="errorMessageText">Gagal memproses desain ulang.</p>
+                            <button onclick="resetWorkspace()" class="mt-6 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-xs px-6 py-3 rounded-xl transition">Coba Lagi</button>
+                        </div>
+
+                        <!-- Layar 4: Lockout Screen -->
+                        <div id="screenLockout" class="absolute inset-0 bg-slate-950/98 flex flex-col items-center justify-center p-8 z-40 hidden">
+                            <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-5 animate-pulse shadow-glow-rose">
+                                <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Kuota Gratis Harian Habis</h3>
+                            <p class="text-xs text-slate-400 mt-2 text-center max-w-md">Jatah gratis harian Anda telah mencapai limit 10.000 Neuron. Silakan hubungkan akun GitHub Anda untuk mengaktifkan status Pro, atau beli jatah premium tanpa batas.</p>
+                            <div class="mt-6 flex gap-3">
+                                <a href="#billing" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-5 py-3 rounded-xl flex items-center gap-1.5 transition active:scale-95 shadow-glow-amber">
+                                    <i data-lucide="zap" class="w-4 h-4 fill-current"></i> Top-up Jatah Premium
+                                </a>
+                            </div>
+                        </div>
+
+                        <iframe id="previewFrame" class="w-full h-full border-none hidden" title="Live Preview"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRO USER DASHBOARD PANEL -->
+    <section id="dashboard" class="py-12 border-t border-slate-900 hidden bg-slate-950/30">
+        <div class="container mx-auto px-4 max-w-7xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="text-indigo-400"></i> Dashboard Pengguna Pro
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Kelola portofolio halaman web premium hasil rancang ulang Anda.</p>
+                </div>
+                <div class="flex items-center gap-4 bg-slate-900/60 p-4 border border-slate-800 rounded-2xl">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-500 block">SALDO AKTIF PREMIUM</span>
+                        <span class="text-lg font-bold text-amber-400 font-mono" id="dashboardPremiumText">0 Neurons</span>
+                    </div>
+                    <a href="#billing" class="p-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl transition border border-amber-500/20">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Grid Proyek Tersimpan -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="projectsGrid">
+                <!-- Project cards injected here -->
+            </div>
+            
+            <div id="noProjectsPlaceholder" class="hidden text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl">
+                <i data-lucide="cloud-off" class="w-12 h-12 text-slate-600 mx-auto mb-4"></i>
+                <h4 class="text-md font-bold text-slate-400">Belum Ada Proyek Disimpan</h4>
+                <p class="text-xs text-slate-500 mt-1">Lakukan desain ulang lalu tekan tombol "Simpan ke Cloud" di workspace.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PREMIUM NEURONS TOP-UP & BILLING STATION -->
+    <section id="billing" class="py-16 border-t border-slate-900">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="text-center mb-12">
+                <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-semibold uppercase tracking-widest">Pricing SaaS</span>
+                <h2 class="text-3xl font-extrabold text-white tracking-tight mt-3">Isi Ulang Jatah Neuron Premium</h2>
+                <p class="text-xs text-slate-400 mt-2">Bebaskan keterbatasan sistem. Beli token premium berkapasitas tinggi dengan dukungan PayPal.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                <!-- Tier 1: Starter Pack -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col justify-between relative hover:border-indigo-500/30 transition duration-300">
+                    <div>
+                        <span class="px-2 py-1 bg-slate-900 border border-slate-800 text-[10px] text-slate-400 rounded-lg font-semibold uppercase">Starter Pack</span>
+                        <h3 class="text-3xl font-extrabold text-white mt-4 font-mono">50.000 <span class="text-xs text-indigo-400 font-normal">Neurons</span></h3>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">Pilihan tepat untuk merancang ulang 10-15 website berukuran sedang.</p>
+                        <div class="border-t border-slate-900 my-4"></div>
+                        <ul class="text-xs text-slate-400 space-y-2">
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> No Expiration Date</li>
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Priority Cloud Processing</li>
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Save Project to Cloud Storage</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6">
+                        <div class="text-center font-extrabold text-white mb-4 text-xl">$4.99 USD</div>
+                        <div id="paypal-btn-starter" class="paypal-button-container"></div>
+                    </div>
+                </div>
+
+                <!-- Tier 2: Pro Elite (Best Value) -->
+                <div class="glass-panel rounded-3xl p-6 border-indigo-500/40 relative shadow-glow-indigo flex flex-col justify-between hover:border-indigo-500 transition duration-300">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-slate-950 font-extrabold text-[9px] px-3 py-1 rounded-full uppercase tracking-wider shadow">Paling Populer</div>
+                    <div>
+                        <span class="px-2 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg font-semibold uppercase text-[10px]">Pro Elite</span>
+                        <h3 class="text-3xl font-extrabold text-white mt-4 font-mono">120.000 <span class="text-xs text-indigo-400 font-normal">Neurons</span></h3>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">Ideal untuk agensi dan desainer lepas profesional dengan volume tinggi.</p>
+                        <div class="border-t border-slate-900 my-4"></div>
+                        <ul class="text-xs text-slate-400 space-y-2">
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Bypass Daily Limits</li>
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Bonus 20.000 Gratis Neurons</li>
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Download Full ZIP Package (Segera)</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6">
+                        <div class="text-center font-extrabold text-white mb-4 text-xl">$9.99 USD</div>
+                        <div id="paypal-btn-pro" class="paypal-button-container"></div>
+                    </div>
+                </div>
+
+                <!-- Tier 3: Mega Agency -->
+                <div class="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300">
+                    <div>
+                        <span class="px-2 py-1 bg-slate-900 border border-slate-800 text-[10px] text-slate-400 rounded-lg font-semibold uppercase">Mega Agency</span>
+                        <h3 class="text-3xl font-extrabold text-white mt-4 font-mono">300.000 <span class="text-xs text-indigo-400 font-normal">Neurons</span></h3>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">Paket komersial lengkap untuk pengembangan berkelanjutan skala bisnis.</p>
+                        <div class="border-t border-slate-900 my-4"></div>
+                        <ul class="text-xs text-slate-400 space-y-2">
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Dedicated Moonshot AI Speed</li>
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Infinite Project Saving</li>
+                            <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 24/7 Dedicated Developer Support</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6">
+                        <div class="text-center font-extrabold text-white mb-4 text-xl">$19.99 USD</div>
+                        <div id="paypal-btn-mega" class="paypal-button-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transaksi Log Modal / Section -->
+    <section class="py-12 border-t border-slate-900 bg-slate-950/60 hidden" id="transactionHistorySection">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <h3 class="text-sm font-bold text-white mb-4">Riwayat Transaksi Topup</h3>
+            <div class="bg-slate-950 border border-slate-900 rounded-2xl overflow-hidden p-4">
+                <table class="w-full text-left text-xs font-mono text-slate-400">
+                    <thead>
+                        <tr class="border-b border-slate-900 pb-2">
+                            <th class="pb-2">Transaction ID</th>
+                            <th class="pb-2">Tanggal</th>
+                            <th class="pb-2 text-right">Neuron</th>
+                            <th class="pb-2 text-right">Total Bayar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        <!-- Rows dynamically loaded -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 py-10 bg-[#0b0f19]">
+        <div class="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-white"></i>
+                </div>
+                <span class="font-bold text-slate-400">WarpZone Redesigner SaaS Edition</span>
+            </div>
+            <p>© 2026 WarpZone AI. Semua Hak Cipta Dilindungi.</p>
+        </div>
+    </footer>
+
+    <!-- Logika Frontend Terintegrasi Penuh -->
+    <script>
+        lucide.createIcons();
+
+        // DOM Elements
+        const redesignForm = document.getElementById("redesignForm");
+        const apiEndpointInput = document.getElementById("apiEndpointInput");
+        const urlInput = document.getElementById("urlInput");
+        const btnSubmit = document.getElementById("btnSubmit");
+
+        const screenPlaceholder = document.getElementById("screenPlaceholder");
+        const screenLoading = document.getElementById("screenLoading");
+        const screenLockout = document.getElementById("screenLockout");
+        const screenError = document.getElementById("screenError");
+        const errorMessageText = document.getElementById("errorMessageText");
+        const previewFrame = document.getElementById("previewFrame");
+        
+        const loadingTitle = document.getElementById("loadingTitle");
+        const loadingLogs = document.getElementById("loadingLogs");
+        const progressBar = document.getElementById("progressBar");
+        
+        const previewUrlLabel = document.getElementById("previewUrlLabel");
+        const btnCopy = document.getElementById("btnCopy");
+        const btnOpen = document.getElementById("btnOpen");
+        const btnSaveToCloud = document.getElementById("btnSaveToCloud");
+
+        // Auth & Status DOM
+        const btnGithubLogin = document.getElementById("btnGithubLogin");
+        const userProfileBadge = document.getElementById("userProfileBadge");
+        const userInitial = document.getElementById("userInitial");
+        const globalNeuronText = document.getElementById("globalNeuronText");
+        const premiumNeuronWidget = document.getElementById("premiumNeuronWidget");
+        const premiumNeuronText = document.getElementById("premiumNeuronText");
+        const dashboardPremiumText = document.getElementById("dashboardPremiumText");
+        
+        const terminalNeuronPercent = document.getElementById("terminalNeuronPercent");
+        const terminalNeuronBar = document.getElementById("terminalNeuronBar");
+        const terminalNeuronUsed = document.getElementById("terminalNeuronUsed");
+
+        const navDashboardLink = document.getElementById("navDashboardLink");
+        const dashboardSection = document.getElementById("dashboard");
+        const projectsGrid = document.getElementById("projectsGrid");
+        const noProjectsPlaceholder = document.getElementById("noProjectsPlaceholder");
+        const transactionHistorySection = document.getElementById("transactionHistorySection");
+        const transactionTableBody = document.getElementById("transactionTableBody");
+
+        // State
+        let currentGeneratedHTML = "";
+        const NEURON_DAILY_LIMIT = 10000;
+
+        // ================================================================
+        //  AUTENTIKASI (mengandalkan cookie, tanpa localStorage)
+        // ================================================================
+
+        async function saasFetch(endpoint, options = {}) {
+            // Tidak menambahkan header Authorization; cookie akan dikirim otomatis.
+            // Pastikan credentials included
+            options.credentials = 'include';
+            if (!options.headers) options.headers = {};
+            if (!options.headers['Content-Type']) options.headers['Content-Type'] = 'application/json';
+            return fetch(endpoint, options);
+        }
+
+        // Fungsi untuk mengecek apakah user sudah login dengan memanggil /api/usage
+        async function fetchNeuronUsage(isManual = false) {
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            if (isManual) {
+                const syncBtnIcon = document.querySelector("#btnSync i");
+                if (syncBtnIcon) syncBtnIcon.classList.add("animate-spin");
+            }
+
+            try {
+                const res = await saasFetch(`${apiBaseUrl}/api/usage`);
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    // Cek apakah user terautentikasi (bukan guest)
+                    const isLoggedIn = data.user && data.user.id !== "guest";
+                    
+                    if (isLoggedIn) {
+                        // Tampilkan elemen pro
+                        btnGithubLogin.classList.add("hidden");
+                        userProfileBadge.classList.remove("hidden");
+                        userInitial.innerText = data.user.username.substring(0, 2).toUpperCase();
+                        navDashboardLink.classList.remove("hidden");
+                        dashboardSection.classList.remove("hidden");
+                        btnSaveToCloud.classList.remove("hidden");
+                        premiumNeuronWidget.classList.remove("hidden");
+                        premiumNeuronText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID");
+                        dashboardPremiumText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID") + " Neurons";
+                        
+                        loadCloudProjects(apiBaseUrl);
+                        loadTransactions(apiBaseUrl);
+                    } else {
+                        // Guest mode
+                        btnGithubLogin.classList.remove("hidden");
+                        userProfileBadge.classList.add("hidden");
+                        navDashboardLink.classList.add("hidden");
+                        dashboardSection.classList.add("hidden");
+                        btnSaveToCloud.classList.add("hidden");
+                        premiumNeuronWidget.classList.add("hidden");
+                    }
+
+                    updateNeuronUI(data.freeUsage, data.user.premiumBalance, isLoggedIn);
+                } else {
+                    // Jika response tidak ok, anggap guest
+                    resetToGuest();
+                }
+            } catch (err) {
+                console.warn("Gagal mengambil status neuron:", err);
+                resetToGuest();
+            } finally {
+                const syncBtnIcon = document.querySelector("#btnSync i");
+                if (syncBtnIcon) syncBtnIcon.classList.remove("animate-spin");
+            }
+        }
+
+        function resetToGuest() {
+            btnGithubLogin.classList.remove("hidden");
+            userProfileBadge.classList.add("hidden");
+            navDashboardLink.classList.add("hidden");
+            dashboardSection.classList.add("hidden");
+            btnSaveToCloud.classList.add("hidden");
+            premiumNeuronWidget.classList.add("hidden");
+            // Tampilkan kuota free default (0)
+            updateNeuronUI(0, 0, false);
+        }
+
+        function updateNeuronUI(freeUsed, premiumBalance, isPro) {
+            const totalFreeUsed = Math.min(Math.max(0, freeUsed), NEURON_DAILY_LIMIT);
+            const remainingFree = NEURON_DAILY_LIMIT - totalFreeUsed;
+            const percentUsed = (totalFreeUsed / NEURON_DAILY_LIMIT) * 100;
+
+            globalNeuronText.innerText = Math.round(remainingFree).toLocaleString("id-ID");
+            terminalNeuronPercent.innerText = Math.round(percentUsed) + "%";
+            terminalNeuronBar.style.width = percentUsed + "%";
+            terminalNeuronUsed.innerText = Math.round(totalFreeUsed).toLocaleString("id-ID") + " Neurons Terpakai";
+
+            if (totalFreeUsed >= NEURON_DAILY_LIMIT && (!isPro || premiumBalance <= 0)) {
+                // Kuota gratis habis dan tidak ada saldo premium
+                screenPlaceholder.classList.add("hidden");
+                screenLoading.classList.add("hidden");
+                previewFrame.classList.add("hidden");
+                screenLockout.classList.remove("hidden");
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+            } else {
+                screenLockout.classList.add("hidden");
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+        }
+
+        // ================================================================
+        //  LOGIN & LOGOUT
+        // ================================================================
+
+        async function handleGithubLogin() {
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            try {
+                // Real OAuth (tanpa mock)
+                const res = await fetch(`${apiBaseUrl}/api/auth/github`);
+                const data = await res.json();
+                if (data.url) {
+                    // Redirect ke GitHub, state disimpan di backend KV
+                    window.location.href = data.url;
+                }
+            } catch (e) {
+                alert("Gagal memulai proses login GitHub.");
+            }
+        }
+
+        function handleLogout() {
+            // Hapus cookie dengan memanggil endpoint logout (backend harus menyediakan)
+            // Atau kita bisa menghapus cookie secara manual di browser (tidak bisa dari JS untuk HttpOnly)
+            // Jadi kita redirect ke endpoint logout atau reload agar cookie tidak terpakai
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            fetch(`${apiBaseUrl}/api/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            }).finally(() => {
+                window.location.reload();
+            });
+        }
+
+        // ================================================================
+        //  PROYEK (CLOUD)
+        // ================================================================
+
+        async function saveProjectToCloud() {
+            if (!currentGeneratedHTML) {
+                alert("Belum ada portofolio rancangan yang berhasil digenerasi.");
+                return;
+            }
+            
+            const targetUrl = urlInput.value.trim();
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+
+            try {
+                const res = await saasFetch(`${apiBaseUrl}/api/projects/save`, {
+                    method: "POST",
+                    body: JSON.stringify({ targetUrl, htmlContent: currentGeneratedHTML })
+                });
+                if (res.ok) {
+                    alert("Rancangan berhasil disimpan dengan aman di cloud WarpZone.");
+                    loadCloudProjects(apiBaseUrl);
+                } else {
+                    const err = await res.json();
+                    alert("Gagal menyimpan: " + (err.error || "Terjadi kesalahan"));
+                }
+            } catch(e) {
+                alert("Kesalahan jaringan saat menyimpan proyek.");
+            }
+        }
+
+        async function loadCloudProjects(apiBaseUrl) {
+            try {
+                const res = await saasFetch(`${apiBaseUrl}/api/projects/list`);
+                if (res.ok) {
+                    const data = await res.json();
+                    projectsGrid.innerHTML = "";
+                    if (data.projects && data.projects.length > 0) {
+                        noProjectsPlaceholder.classList.add("hidden");
+                        data.projects.forEach(proj => {
+                            const sizeKb = (proj.size / 1024).toFixed(1);
+                            const card = document.createElement("div");
+                            card.className = "glass-panel p-5 rounded-2xl flex flex-col justify-between border-slate-800 hover:border-indigo-500/40 transition";
+                            card.innerHTML = `
+                                <div>
+                                    <div class="flex items-center justify-between mb-3 text-xs">
+                                        <span class="text-slate-500 font-mono">${new Date(proj.savedAt).toLocaleDateString()}</span>
+                                        <span class="px-2 py-0.5 bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 rounded-md">${sizeKb} KB</span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-white truncate" title="${proj.targetUrl}">${proj.targetUrl.replace(/^https?:\/\//i, '')}</h4>
+                                </div>
+                                <div class="flex gap-2 mt-4 pt-4 border-t border-slate-900">
+                                    <a href="${apiBaseUrl}/api/projects/view?id=${proj.id}" target="_blank" class="flex-1 text-center py-2 bg-slate-900 border border-slate-800 rounded-xl hover:text-white text-xs transition">
+                                        Open Live
+                                    </a>
+                                    <button onclick="deleteCloudProject('${proj.id}')" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 rounded-xl transition">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            `;
+                            projectsGrid.appendChild(card);
+                        });
+                        lucide.createIcons();
+                    } else {
+                        noProjectsPlaceholder.classList.remove("hidden");
+                    }
+                }
+            } catch(e) {}
+        }
+
+        async function deleteCloudProject(id) {
+            if (!confirm("Hapus proyek ini secara permanen?")) return;
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            try {
+                const res = await saasFetch(`${apiBaseUrl}/api/projects/delete?id=${id}`, { method: "DELETE" });
+                if (res.ok) {
+                    loadCloudProjects(apiBaseUrl);
+                }
+            } catch(e) {}
+        }
+
+        // ================================================================
+        //  TRANSACTIONS
+        // ================================================================
+
+        async function loadTransactions(apiBaseUrl) {
+            try {
+                const res = await saasFetch(`${apiBaseUrl}/api/transactions/list`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.transactions && data.transactions.length > 0) {
+                        transactionHistorySection.classList.remove("hidden");
+                        transactionTableBody.innerHTML = "";
+                        data.transactions.forEach(tx => {
+                            const tr = document.createElement("tr");
+                            tr.className = "border-b border-slate-900";
+                            tr.innerHTML = `
+                                <td class="py-2 font-mono text-indigo-400">${tx.id}</td>
+                                <td class="py-2 text-slate-500">${new Date(tx.date).toLocaleDateString()}</td>
+                                <td class="py-2 text-right text-emerald-400 font-bold">${tx.neurons.toLocaleString()}</td>
+                                <td class="py-2 text-right text-white font-bold">$${tx.amount}</td>
+                            `;
+                            transactionTableBody.appendChild(tr);
+                        });
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // ================================================================
+        //  PAYPAL BUTTONS
+        // ================================================================
+
+        function initPayPalButtons() {
+            const tiers = ["starter", "pro", "mega"];
+            tiers.forEach(tier => {
+                const containerId = `#paypal-btn-${tier}`;
+                if (document.querySelector(containerId)) {
+                    paypal.Buttons({
+                        createOrder: async function() {
+                            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+                            const response = await saasFetch(`${apiBaseUrl}/api/paypal/create-order`, {
+                                method: "POST",
+                                body: JSON.stringify({ tierKey: tier })
+                            });
+                            if (!response.ok) {
+                                const err = await response.json();
+                                alert(err.error || "Gagal membuat sesi pembayaran.");
+                                return;
+                            }
+                            const order = await response.json();
+                            return order.orderID;
+                        },
+                        onApprove: async function(data) {
+                            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+                            const response = await saasFetch(`${apiBaseUrl}/api/paypal/capture-order`, {
+                                method: "POST",
+                                body: JSON.stringify({ orderID: data.orderID, tierKey: tier })
+                            });
+                            if (response.ok) {
+                                alert("Terima kasih! Pembelian berhasil. Saldo premium Anda diperbarui.");
+                                fetchNeuronUsage();
+                            } else {
+                                alert("Gagal memproses kredit saldo.");
+                            }
+                        }
+                    }).render(containerId);
+                }
+            });
+        }
+
+        // Tunggu PayPal SDK siap
+        setTimeout(initPayPalButtons, 1500);
+
+        // ================================================================
+        //  REDESIGN FORM SUBMIT
+        // ================================================================
+
+        const loadingSteps = [
+            { title: "Menghubungkan Engine...", log: "> Mengirim jabat tangan aman ke Cloudflare Edge...", progress: 20 },
+            { title: "Membaca Target Halaman...", log: "> Vercel Client mengikis boilerplate DOM situs target...", progress: 45 },
+            { title: "Merestrukturisasi Konten...", log: "> Melucuti markup kusam, menyusun ulang data mentah...", progress: 65 },
+            { title: "Merancang Desain Baru...", log: "> Model kimi-k2.7-code mulai melukis layout modern...", progress: 85 }
+        ];
+
+        redesignForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const targetUrl = urlInput.value.trim();
+            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+
+            if (!targetUrl) return;
+
+            screenPlaceholder.classList.add("hidden");
+            previewFrame.classList.add("hidden");
+            screenError.classList.add("hidden");
+            screenLockout.classList.add("hidden");
+            screenLoading.classList.remove("hidden");
+            
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+            btnCopy.disabled = true;
+            btnOpen.disabled = true;
+
+            let animCompleted = false;
+            
+            const runAnim = async () => {
+                for (let i = 0; i < loadingSteps.length; i++) {
+                    if (animCompleted) break;
+                    loadingTitle.innerText = loadingSteps[i].title;
+                    loadingLogs.innerText = loadingSteps[i].log;
+                    progressBar.style.width = loadingSteps[i].progress + "%";
+                    await new Promise(r => setTimeout(r, 1500));
+                }
+            };
+            runAnim();
+
+            try {
+                const response = await saasFetch(apiBaseUrl + '/api/redesign?url=' + encodeURIComponent(targetUrl));
+
+                if (response.status === 429) {
+                    animCompleted = true;
+                    updateNeuronUI(NEURON_DAILY_LIMIT, 0, false);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || `HTTP ${response.status}`);
+                }
+
+                const newUsage = response.headers.get("X-Neuron-Total-Usage");
+                if (newUsage) {
+                    setTimeout(() => fetchNeuronUsage(), 800);
+                } else {
+                    setTimeout(fetchNeuronUsage, 1000);
+                }
+
+                currentGeneratedHTML = await response.text();
+
+                if (!currentGeneratedHTML.includes("<!DOCTYPE html>") && !currentGeneratedHTML.includes("<html")) {
+                    throw new Error("Respon server AI tidak valid.");
+                }
+
+                animCompleted = true;
+                loadingTitle.innerText = "Selesai Merancang!";
+                loadingLogs.innerText = "> Menyisipkan skrip Tailwind & merender ikon Lucide...";
+                progressBar.style.width = "100%";
+                await new Promise(r => setTimeout(r, 600));
+
+                const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                doc.open();
+                doc.write(currentGeneratedHTML);
+                doc.close();
+
+                previewUrlLabel.innerText = targetUrl.replace(/^https?:\/\//i, '');
+
+                screenLoading.classList.add("hidden");
+                previewFrame.classList.remove("hidden");
+
+                btnCopy.disabled = false;
+                btnOpen.disabled = false;
+
+            } catch (err) {
+                animCompleted = true;
+                screenLoading.classList.add("hidden");
+                screenError.classList.remove("hidden");
+                errorMessageText.innerText = err.message || "Gagal menghubungi AI Server karena kendala jaringan.";
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+        });
+
+        // ================================================================
+        //  UTILITY FUNCTIONS
+        // ================================================================
+
+        btnCopy.addEventListener("click", () => {
+            if (!currentGeneratedHTML) return;
+            const textarea = document.createElement('textarea');
+            textarea.value = currentGeneratedHTML;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const originalIcon = btnCopy.innerHTML;
+            btnCopy.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>`;
+            lucide.createIcons();
+            setTimeout(() => { btnCopy.innerHTML = originalIcon; lucide.createIcons(); }, 2000);
+        });
+
+        btnOpen.addEventListener("click", () => {
+            if (!currentGeneratedHTML) return;
+            const newWindow = window.open();
+            newWindow.document.write(currentGeneratedHTML);
+            newWindow.document.close();
+        });
+
+        function resetWorkspace() {
+            screenError.classList.add("hidden");
+            screenLockout.classList.add("hidden");
+            screenPlaceholder.classList.remove("hidden");
+            previewFrame.classList.add("hidden");
+            currentGeneratedHTML = "";
+            btnCopy.disabled = true;
+            btnOpen.disabled = true;
+        }
+
+        // ================================================================
+        //  INISIALISASI
+        // ================================================================
+
+        // Ambil endpoint dari localStorage jika ada
+        const savedApi = localStorage.getItem("saved_api_url");
+        if (savedApi) apiEndpointInput.value = savedApi;
+
+        // Setiap kali endpoint diubah, simpan
+        apiEndpointInput.addEventListener("change", () => {
+            localStorage.setItem("saved_api_url", apiEndpointInput.value.trim());
+        });
+
+        // Cek status user saat load
+        fetchNeuronUsage();
+
+        // Jika ada parameter auth_success di URL, berarti login berhasil
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("auth_success")) {
+            // Hapus parameter dari URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            fetchNeuronUsage();
+        }
+
+        // Perbaiki ikon setelah konten berubah
+        document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
+        lucide.createIcons();
+
+    </script>
+</body>
+</html>
