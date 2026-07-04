@@ -488,7 +488,7 @@
         // ================================================================
 
         async function fetchNeuronUsage(isManual = false) {
-            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
+            const apiBaseUrl = "https://ai-redesign.warpzone.workers.dev";
             if (isManual) {
                 const syncBtnIcon = document.querySelector("#btnSync i");
                 if (syncBtnIcon) syncBtnIcon.classList.add("animate-spin");
