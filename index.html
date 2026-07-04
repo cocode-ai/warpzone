@@ -416,7 +416,7 @@
     <script>
         lucide.createIcons();
 
-        // Target API Worker yang telah di-hardcode sesuai kebutuhan link baru Anda
+        // Target API Worker Anda
         const API_BASE_URL = "https://ai-redesign.warpzone.workers.dev";
 
         // DOM Elements
@@ -466,13 +466,20 @@
         let paypalButtonsInitialized = false;
 
         // ================================================================
-        //  SAAS FETCH WITH CREDENTIALS
+        //  HYBRID AUTH: SAAS FETCH WITH BEARER HEADER
         // ================================================================
 
         async function saasFetch(endpoint, options = {}) {
             options.credentials = 'include';
             if (!options.headers) options.headers = {};
             if (!options.headers['Content-Type']) options.headers['Content-Type'] = 'application/json';
+            
+            // Baca token dari localStorage
+            const localToken = localStorage.getItem("auth_token");
+            if (localToken) {
+                options.headers['Authorization'] = `Bearer ${localToken}`;
+            }
+            
             return fetch(endpoint, options);
         }
 
@@ -503,7 +510,7 @@
                         premiumNeuronText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID");
                         dashboardPremiumText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID") + " Neurons";
                         
-                        // User login: Tampilkan Tombol Paypal, Sembunyikan Pesan Tamu
+                        // Sembunyikan Pesan Tamu & Render Tombol PayPal
                         document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.add("hidden"));
                         document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.remove("hidden"));
                         
@@ -514,16 +521,9 @@
                         loadCloudProjects();
                         loadTransactions();
                     } else {
-                        btnGithubLogin.classList.remove("hidden");
-                        userProfileBadge.classList.add("hidden");
-                        navDashboardLink.classList.add("hidden");
-                        dashboardSection.classList.add("hidden");
-                        btnSaveToCloud.classList.add("hidden");
-                        premiumNeuronWidget.classList.add("hidden");
-
-                        // Tamu: Sembunyikan tombol Paypal, Tampilkan Pesan Tamu (Tampilan Bersih Tanpa Tombol)
-                        document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.remove("hidden"));
-                        document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.add("hidden"));
+                        // Bersihkan token tidak valid jika API mendeteksi status guest
+                        localStorage.removeItem("auth_token");
+                        resetToGuest();
                     }
 
                     updateNeuronUI(data.freeUsage, data.user.premiumBalance, isLoggedIn);
@@ -585,6 +585,7 @@
 
         async function handleGithubLogin() {
             try {
+                // Catat domain frontend aktif tempat user berada saat ini
                 const localUrl = window.location.origin + window.location.pathname;
                 const initResp = await fetch(`${API_BASE_URL}/api/auth/github?frontend_url=${encodeURIComponent(localUrl)}`);
                 const data = await initResp.json();
@@ -598,6 +599,8 @@
         }
 
         function handleLogout() {
+            // Hapus token di lokal browser
+            localStorage.removeItem("auth_token");
             fetch(`${API_BASE_URL}/api/logout`, {
                 method: 'POST',
                 credentials: 'include'
@@ -891,14 +894,22 @@
             btnOpen.disabled = true;
         }
 
-        // Jalankan fetch status awal
-        fetchNeuronUsage();
+        // ================================================================
+        //  HYBRID AUTHENTICATION HANDLER (ON LOAD)
+        // ================================================================
 
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get("auth_success")) {
+        const tokenParam = urlParams.get("token");
+        
+        // Jika ada parameter token di URL redirect callback, amankan ke localStorage
+        if (tokenParam) {
+            localStorage.setItem("auth_token", tokenParam);
+            // Bersihkan parameter dari URL agar browser tetap rapi & bersih dari token JWT
             window.history.replaceState({}, document.title, window.location.pathname);
-            fetchNeuronUsage();
         }
+
+        // Jalankan fetch status awal menggunakan Hybrid Token
+        fetchNeuronUsage();
 
         document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
         lucide.createIcons();
