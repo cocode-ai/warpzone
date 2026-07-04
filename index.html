@@ -140,12 +140,6 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Endpoint API Cloudflare Worker</label>
-                                <input type="url" id="apiEndpointInput" required value="https://ai-redesign.warpzone.workers.dev" 
-                                    class="w-full glass-input rounded-xl px-4 py-3 text-sm text-slate-300 font-mono focus:outline-none">
-                            </div>
-                            
-                            <div>
                                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Target Website URL</label>
                                 <div class="relative">
                                     <input type="url" id="urlInput" required placeholder="https://daffadevhosting.github.io" 
@@ -309,7 +303,7 @@
             <div class="text-center mb-12">
                 <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-semibold uppercase tracking-widest">Pricing SaaS</span>
                 <h2 class="text-3xl font-extrabold text-white tracking-tight mt-3">Isi Ulang Jatah Neuron Premium</h2>
-                <p class="text-xs text-slate-400 mt-2">Bebaskan keterbatasan sistem. Beli token premium berkapasitas tinggi dengan dukungan PayPal.</p>
+                <p class="text-xs text-slate-400 mt-2">Bebaskan keterbatasan sistem. Beli token premium berkapasitas tinggi dengan dukungan PayPal setelah login.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
@@ -326,13 +320,12 @@
                             <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Save Project to Cloud Storage</li>
                         </ul>
                     </div>
-                    <div class="mt-6">
+                    <div class="mt-6 border-t border-slate-900/60 pt-4">
                         <div class="text-center font-extrabold text-white mb-4 text-xl">$4.99 USD</div>
                         <div id="paypal-btn-starter" class="paypal-button-container hidden"></div>
-                        <button onclick="handleGithubLogin()" class="paypal-login-cta w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md">
-                            <i data-lucide="github" class="w-4 h-4"></i>
-                            <span>Login to Purchase</span>
-                        </button>
+                        <div class="guest-pricing-msg text-center text-xs text-slate-500 py-3 bg-slate-950/40 rounded-xl border border-slate-900">
+                            Silakan login untuk membeli
+                        </div>
                     </div>
                 </div>
 
@@ -350,13 +343,12 @@
                             <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Download Full ZIP Package</li>
                         </ul>
                     </div>
-                    <div class="mt-6">
+                    <div class="mt-6 border-t border-slate-900/60 pt-4">
                         <div class="text-center font-extrabold text-white mb-4 text-xl">$9.99 USD</div>
                         <div id="paypal-btn-pro" class="paypal-button-container hidden"></div>
-                        <button onclick="handleGithubLogin()" class="paypal-login-cta w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md">
-                            <i data-lucide="github" class="w-4 h-4"></i>
-                            <span>Login to Purchase</span>
-                        </button>
+                        <div class="guest-pricing-msg text-center text-xs text-slate-500 py-3 bg-slate-950/40 rounded-xl border border-slate-900">
+                            Silakan login untuk membeli
+                        </div>
                     </div>
                 </div>
 
@@ -373,13 +365,12 @@
                             <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 24/7 Dedicated Developer Support</li>
                         </ul>
                     </div>
-                    <div class="mt-6">
+                    <div class="mt-6 border-t border-slate-900/60 pt-4">
                         <div class="text-center font-extrabold text-white mb-4 text-xl">$19.99 USD</div>
                         <div id="paypal-btn-mega" class="paypal-button-container hidden"></div>
-                        <button onclick="handleGithubLogin()" class="paypal-login-cta w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md">
-                            <i data-lucide="github" class="w-4 h-4"></i>
-                            <span>Login to Purchase</span>
-                        </button>
+                        <div class="guest-pricing-msg text-center text-xs text-slate-500 py-3 bg-slate-950/40 rounded-xl border border-slate-900">
+                            Silakan login untuk membeli
+                        </div>
                     </div>
                 </div>
             </div>
@@ -425,9 +416,11 @@
     <script>
         lucide.createIcons();
 
+        // Target API Worker yang telah di-hardcode sesuai kebutuhan link baru Anda
+        const API_BASE_URL = "https://ai-redesign.warpzone.workers.dev";
+
         // DOM Elements
         const redesignForm = document.getElementById("redesignForm");
-        const apiEndpointInput = document.getElementById("apiEndpointInput");
         const urlInput = document.getElementById("urlInput");
         const btnSubmit = document.getElementById("btnSubmit");
 
@@ -488,17 +481,15 @@
         // ================================================================
 
         async function fetchNeuronUsage(isManual = false) {
-            const apiBaseUrl = "https://ai-redesign.warpzone.workers.dev";
             if (isManual) {
                 const syncBtnIcon = document.querySelector("#btnSync i");
                 if (syncBtnIcon) syncBtnIcon.classList.add("animate-spin");
             }
 
             try {
-                const res = await saasFetch(`${apiBaseUrl}/api/usage`);
+                const res = await saasFetch(`${API_BASE_URL}/api/usage`);
                 if (res.ok) {
                     const data = await res.json();
-                    
                     const isLoggedIn = data.user && data.user.id !== "guest";
                     
                     if (isLoggedIn) {
@@ -512,17 +503,16 @@
                         premiumNeuronText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID");
                         dashboardPremiumText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID") + " Neurons";
                         
-                        // Sembunyikan CTA Login, Munculkan tombol PayPal asli
-                        document.querySelectorAll(".paypal-login-cta").forEach(cta => cta.classList.add("hidden"));
+                        // User login: Tampilkan Tombol Paypal, Sembunyikan Pesan Tamu
+                        document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.add("hidden"));
                         document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.remove("hidden"));
                         
-                        // Mulai inisialisasi PayPal Buttons jika belum pernah di-init
                         if (!paypalButtonsInitialized) {
                             initPayPalButtons();
                         }
 
-                        loadCloudProjects(apiBaseUrl);
-                        loadTransactions(apiBaseUrl);
+                        loadCloudProjects();
+                        loadTransactions();
                     } else {
                         btnGithubLogin.classList.remove("hidden");
                         userProfileBadge.classList.add("hidden");
@@ -531,8 +521,8 @@
                         btnSaveToCloud.classList.add("hidden");
                         premiumNeuronWidget.classList.add("hidden");
 
-                        // Munculkan CTA Login, Sembunyikan tombol PayPal asli
-                        document.querySelectorAll(".paypal-login-cta").forEach(cta => cta.classList.remove("hidden"));
+                        // Tamu: Sembunyikan tombol Paypal, Tampilkan Pesan Tamu (Tampilan Bersih Tanpa Tombol)
+                        document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.remove("hidden"));
                         document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.add("hidden"));
                     }
 
@@ -541,11 +531,13 @@
                     resetToGuest();
                 }
             } catch (err) {
-                console.warn("Gagal mengambil status neuron:", err);
+                console.warn("Gagal terhubung dengan server API:", err);
                 resetToGuest();
             } finally {
-                const syncBtnIcon = document.querySelector("#btnSync i");
-                if (syncBtnIcon) syncBtnIcon.classList.remove("animate-spin");
+                if (isManual) {
+                    const syncBtnIcon = document.querySelector("#btnSync i");
+                    if (syncBtnIcon) syncBtnIcon.classList.remove("animate-spin");
+                }
             }
         }
 
@@ -557,7 +549,7 @@
             btnSaveToCloud.classList.add("hidden");
             premiumNeuronWidget.classList.add("hidden");
             
-            document.querySelectorAll(".paypal-login-cta").forEach(cta => cta.classList.remove("hidden"));
+            document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.remove("hidden"));
             document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.add("hidden"));
             
             updateNeuronUI(0, 0, false);
@@ -592,24 +584,21 @@
         // ================================================================
 
         async function handleGithubLogin() {
-            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
             try {
-                // Beritahukan domain frontend kita saat ini agar dikembalikan setelah otentikasi
                 const localUrl = window.location.origin + window.location.pathname;
-                const initResp = await fetch(`${apiBaseUrl}/api/auth/github?frontend_url=${encodeURIComponent(localUrl)}`);
+                const initResp = await fetch(`${API_BASE_URL}/api/auth/github?frontend_url=${encodeURIComponent(localUrl)}`);
                 const data = await initResp.json();
                 if (data.url) {
                     window.location.href = data.url;
                 }
             } catch (e) {
-                console.error("Gagal memulai otentikasi GitHub:", e);
-                alert("Gagal terhubung dengan Server API Auth.");
+                console.error("Gagal melakukan handshaking Auth API:", e);
+                alert("Gagal menghubungi server otorisasi WarpZone.");
             }
         }
 
         function handleLogout() {
-            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
-            fetch(`${apiBaseUrl}/api/logout`, {
+            fetch(`${API_BASE_URL}/api/logout`, {
                 method: 'POST',
                 credentials: 'include'
             }).finally(() => {
@@ -618,26 +607,25 @@
         }
 
         // ================================================================
-        //  R2 / KV PROJECTS CLOUD MANAGEMENT
+        //  PORTFOLIO MANAGEMENT
         // ================================================================
 
         async function saveProjectToCloud() {
             if (!currentGeneratedHTML) {
-                alert("Belum ada portofolio rancangan yang berhasil digenerasi.");
+                alert("Belum ada portofolio rancangan yang siap disimpan.");
                 return;
             }
             
             const targetUrl = urlInput.value.trim();
-            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
 
             try {
-                const res = await saasFetch(`${apiBaseUrl}/api/projects/save`, {
+                const res = await saasFetch(`${API_BASE_URL}/api/projects/save`, {
                     method: "POST",
                     body: JSON.stringify({ targetUrl, htmlContent: currentGeneratedHTML })
                 });
                 if (res.ok) {
-                    alert("Rancangan berhasil disimpan dengan aman di cloud WarpZone.");
-                    loadCloudProjects(apiBaseUrl);
+                    alert("Rancangan berhasil disimpan di cloud WarpZone.");
+                    loadCloudProjects();
                 } else {
                     const err = await res.json();
                     alert("Gagal menyimpan: " + (err.error || "Terjadi kesalahan"));
@@ -647,9 +635,9 @@
             }
         }
 
-        async function loadCloudProjects(apiBaseUrl) {
+        async function loadCloudProjects() {
             try {
-                const res = await saasFetch(`${apiBaseUrl}/api/projects/list`);
+                const res = await saasFetch(`${API_BASE_URL}/api/projects/list`);
                 if (res.ok) {
                     const data = await res.json();
                     projectsGrid.innerHTML = "";
@@ -668,7 +656,7 @@
                                     <h4 class="text-sm font-bold text-white truncate" title="${proj.targetUrl}">${proj.targetUrl.replace(/^https?:\/\//i, '')}</h4>
                                 </div>
                                 <div class="flex gap-2 mt-4 pt-4 border-t border-slate-900">
-                                    <a href="${apiBaseUrl}/api/projects/view?id=${proj.id}" target="_blank" class="flex-1 text-center py-2 bg-slate-900 border border-slate-800 rounded-xl hover:text-white text-xs transition">
+                                    <a href="${API_BASE_URL}/api/projects/view?id=${proj.id}" target="_blank" class="flex-1 text-center py-2 bg-slate-900 border border-slate-800 rounded-xl hover:text-white text-xs transition">
                                         Open Live
                                     </a>
                                     <button onclick="deleteCloudProject('${proj.id}')" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 rounded-xl transition">
@@ -688,11 +676,10 @@
 
         async function deleteCloudProject(id) {
             if (!confirm("Hapus proyek ini secara permanen?")) return;
-            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
             try {
-                const res = await saasFetch(`${apiBaseUrl}/api/projects/delete?id=${id}`, { method: "DELETE" });
+                const res = await saasFetch(`${API_BASE_URL}/api/projects/delete?id=${id}`, { method: "DELETE" });
                 if (res.ok) {
-                    loadCloudProjects(apiBaseUrl);
+                    loadCloudProjects();
                 }
             } catch(e) {}
         }
@@ -701,9 +688,9 @@
         //  TRANSACTIONS VIEW
         // ================================================================
 
-        async function loadTransactions(apiBaseUrl) {
+        async function loadTransactions() {
             try {
-                const res = await saasFetch(`${apiBaseUrl}/api/transactions/list`);
+                const res = await saasFetch(`${API_BASE_URL}/api/transactions/list`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.transactions && data.transactions.length > 0) {
@@ -726,7 +713,7 @@
         }
 
         // ================================================================
-        //  PAYPAL CORE SCRIPT INITIALIZATION
+        //  PAYPAL INTEGRATION SCRIPT
         // ================================================================
 
         function initPayPalButtons() {
@@ -738,11 +725,10 @@
                     const containerId = `#paypal-btn-${tier}`;
                     const targetContainer = document.querySelector(containerId);
                     if (targetContainer) {
-                        targetContainer.innerHTML = ''; // bersihkan mock up lama
+                        targetContainer.innerHTML = '';
                         paypal.Buttons({
                             createOrder: async function() {
-                                const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
-                                const response = await saasFetch(`${apiBaseUrl}/api/paypal/create-order`, {
+                                const response = await saasFetch(`${API_BASE_URL}/api/paypal/create-order`, {
                                     method: "POST",
                                     body: JSON.stringify({ tierKey: tier })
                                 });
@@ -755,8 +741,7 @@
                                 return order.orderID;
                             },
                             onApprove: async function(data) {
-                                const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
-                                const response = await saasFetch(`${apiBaseUrl}/api/paypal/capture-order`, {
+                                const response = await saasFetch(`${API_BASE_URL}/api/paypal/capture-order`, {
                                     method: "POST",
                                     body: JSON.stringify({ orderID: data.orderID, tierKey: tier })
                                 });
@@ -772,26 +757,25 @@
                 });
                 paypalButtonsInitialized = true;
             } catch (err) {
-                console.error("Gagal melakukan load tombol paypal SDK:", err);
+                console.error("Gagal memuat tombol Paypal SDK:", err);
             }
         }
 
         // ================================================================
-        //  ENGINE TRIGGER & INTERACTIVE PROGRESS BAR
+        //  AI ENGINE REDESIGN PROCESS
         // ================================================================
 
         const loadingSteps = [
             { title: "Menghubungkan Engine...", log: "> Mengirim jabat tangan aman ke Cloudflare Edge...", progress: 20 },
             { title: "Membaca Target Halaman...", log: "> Mengikis DOM situs target menggunakan Reader API...", progress: 45 },
             { title: "Merestrukturisasi Konten...", log: "> Menyusun ulang data dan melucuti markup kusam...", progress: 65 },
-            { title: "Merancang Desain Baru...", log: "> Model Kimi-k2.7-code melukis layout modern...", progress: 85 }
+            { title: "Merancang Desain Baru...", log: "> Model AI mengompilasi layout modern Tailwind...", progress: 85 }
         ];
 
         redesignForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const targetUrl = urlInput.value.trim();
-            const apiBaseUrl = apiEndpointInput.value.trim().replace(/\/$/, "");
 
             if (!targetUrl) return;
 
@@ -820,7 +804,7 @@
             runAnim();
 
             try {
-                const response = await saasFetch(apiBaseUrl + '/api/redesign?url=' + encodeURIComponent(targetUrl));
+                const response = await saasFetch(API_BASE_URL + '/api/redesign?url=' + encodeURIComponent(targetUrl));
 
                 if (response.status === 429) {
                     animCompleted = true;
@@ -833,7 +817,6 @@
                     throw new Error(errData.message || `HTTP ${response.status}`);
                 }
 
-                // Ambil sisa kuota terbaru
                 setTimeout(fetchNeuronUsage, 1000);
 
                 currentGeneratedHTML = await response.text();
@@ -873,7 +856,7 @@
         });
 
         // ================================================================
-        //  UTILITY FUNCTIONS
+        //  UTILITIES & ENTRY POINT
         // ================================================================
 
         btnCopy.addEventListener("click", () => {
@@ -908,18 +891,7 @@
             btnOpen.disabled = true;
         }
 
-        // ================================================================
-        //  INITIALIZATION LOCK
-        // ================================================================
-
-        const savedApi = localStorage.getItem("saved_api_url");
-        if (savedApi) apiEndpointInput.value = savedApi;
-
-        apiEndpointInput.addEventListener("change", () => {
-            localStorage.setItem("saved_api_url", apiEndpointInput.value.trim());
-        });
-
-        // Inisialisasi awal check
+        // Jalankan fetch status awal
         fetchNeuronUsage();
 
         const urlParams = new URLSearchParams(window.location.search);
