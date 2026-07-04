@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WarpZone Premium Website Redesigner — SaaS Dashboard</title>
+    <title>WarpZone Premium AI Website Redesigner — SaaS Dashboard</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,30 +88,68 @@
                 <a href="#billing" class="hover:text-white transition">Beli Neuron</a>
             </nav>
 
-            <div class="flex items-center gap-3">
-                <!-- Status Premium Balance Widget -->
-                <div id="premiumNeuronWidget" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 text-xs font-semibold">
-                    <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
-                    <span>Pro Balance: <span id="premiumNeuronText" class="text-white font-mono">0</span> <span class="text-slate-500 font-normal">Neurons</span></span>
-                </div>
-
+            <div class="flex items-center gap-2">
                 <!-- Global Dynamic Free Neuron Badge -->
-                <div id="globalNeuronWidget" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-semibold">
-                    <i data-lucide="zap" id="globalNeuronIcon" class="w-4 h-4 text-amber-400"></i>
-                    <span>Kuota Free: <span id="globalNeuronText" class="text-white font-mono">10,000</span> <span class="text-slate-500">Neurons</span></span>
+                <div id="globalNeuronWidget" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-semibold">
+                    <i data-lucide="zap" id="globalNeuronIcon" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>Free: <span id="globalNeuronText" class="text-white font-mono">10.000</span></span>
                 </div>
                 
-                <!-- Github Login / Profile Action -->
-                <div id="authContainer">
+                <!-- Github Login / Profile Dropdown (Twitter Style) -->
+                <div id="authContainer" class="relative">
                     <button id="btnGithubLogin" onclick="handleGithubLogin()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-white transition active:scale-95">
                         <i data-lucide="github" class="w-4 h-4"></i>
-                        <span>Login Pro (GitHub)</span>
+                        <span>Login (GitHub)</span>
                     </button>
-                    <div id="userProfileBadge" class="hidden flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-400 flex items-center justify-center font-bold text-xs" id="userInitial">G</div>
-                        <button onclick="handleLogout()" class="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl transition" title="Log Out">
-                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                    
+                    <!-- Twitter Style Dropdown Trigger -->
+                    <div id="userProfileBadge" class="hidden">
+                        <button onclick="toggleProfileDropdown()" class="flex items-center gap-2 p-1.5 pr-3 hover:bg-slate-800/60 rounded-full border border-slate-800 transition active:scale-95">
+                            <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-400 flex items-center justify-center font-extrabold text-xs text-indigo-300" id="userInitial">
+                                U
+                            </div>
+                            <span class="text-xs font-semibold text-slate-200 hidden sm:inline" id="headerUsername">Username</span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-500"></i>
                         </button>
+                        
+                        <!-- Dropdown Content -->
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-64 glass-panel rounded-2xl shadow-xl border border-slate-800 z-50 p-4">
+                            <div class="flex items-center gap-3 pb-3 border-b border-slate-800/80">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center font-extrabold text-sm text-white shadow-md shadow-indigo-500/20" id="dropdownInitial">
+                                    U
+                                </div>
+                                <div class="truncate">
+                                    <h4 class="text-sm font-bold text-white truncate" id="dropdownUsername">Username</h4>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[9px] font-extrabold uppercase border border-amber-500/20">
+                                        <i data-lucide="crown" class="w-2.5 h-2.5 fill-current"></i> Pro Member
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Rincian Saldo -->
+                            <div class="py-3 space-y-2 text-xs">
+                                <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-900">
+                                    <span class="text-slate-400 flex items-center gap-1">
+                                        <i data-lucide="gem" class="w-3.5 h-3.5 text-amber-400"></i> Pro Balance:
+                                    </span>
+                                    <span class="font-bold text-amber-300 font-mono" id="dropdownPremiumBalance">0</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-950">
+                                    <span class="text-slate-400 flex items-center gap-1">
+                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-400"></i> Free Quota:
+                                    </span>
+                                    <span class="font-bold text-slate-200 font-mono" id="dropdownFreeBalance">0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Menu Aksi -->
+                            <div class="border-t border-slate-800/80 pt-2">
+                                <button onclick="handleLogout()" class="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded-xl transition text-xs font-semibold">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    <span>Keluar Sesi (Logout)</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -119,12 +157,12 @@
     </header>
 
     <!-- Main Workspace Panel -->
-    <section id="workspace" class="py-12 container mx-auto px-4 max-w-7xl">
+    <section id="workspace" class="py-6 md:py-12 container mx-auto px-4 max-w-7xl">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             
             <!-- Panel Kiri: Form Kontrol -->
             <div class="lg:col-span-5 flex flex-col gap-6">
-                <form id="redesignForm" class="glass-panel rounded-3xl p-6 md:p-8 shadow-glow-indigo flex flex-col justify-between h-full space-y-6">
+                <form id="redesignForm" class="glass-panel rounded-3xl p-5 md:p-8 shadow-glow-indigo flex flex-col justify-between h-full space-y-6">
                     <div>
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-2">
@@ -185,25 +223,26 @@
 
             <!-- Panel Kanan: Previewer Real -->
             <div class="lg:col-span-7">
-                <div class="glass-panel rounded-3xl overflow-hidden h-[580px] flex flex-col relative" id="previewContainer">
-                    <div class="bg-slate-950/60 px-6 py-4 border-b border-slate-900 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="flex gap-1.5">
+                <div class="glass-panel rounded-3xl overflow-hidden h-[500px] md:h-[580px] flex flex-col relative" id="previewContainer">
+                    <div class="bg-slate-950/60 px-4 md:px-6 py-4 border-b border-slate-900 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <span class="hidden sm:flex gap-1.5 flex-shrink-0">
                                 <span class="w-3 h-3 rounded-full bg-rose-500"></span>
                                 <span class="w-3 h-3 rounded-full bg-amber-500"></span>
                                 <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
                             </span>
-                            <span class="text-xs font-mono text-slate-400 px-3 py-1 rounded bg-slate-900 border border-slate-800" id="previewUrlLabel">localhost:3000</span>
+                            <span class="text-xs font-mono text-slate-400 px-3 py-1 rounded bg-slate-900 border border-slate-800 truncate max-w-[150px] sm:max-w-xs" id="previewUrlLabel">localhost:3000</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <!-- Premium Save to R2 Button -->
-                            <button id="btnSaveToCloud" onclick="saveProjectToCloud()" class="hidden px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition" title="Simpan ke Dashboard Cloud">
-                                <i data-lucide="cloud-lightning" class="w-4 h-4"></i> Simpan ke Cloud (Pro)
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <!-- Premium Save to R2 Button: Icon-Only on Mobile -->
+                            <button id="btnSaveToCloud" onclick="saveProjectToCloud()" class="hidden px-2.5 sm:px-3 py-2 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition" title="Simpan ke Dashboard Cloud">
+                                <i data-lucide="cloud-lightning" class="w-4 h-4 text-indigo-400"></i> 
+                                <span class="hidden md:inline">Simpan ke Cloud (Pro)</span>
                             </button>
-                            <button id="btnCopy" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition disabled:opacity-30" disabled title="Salin Kode HTML">
+                            <button id="btnCopy" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition disabled:opacity-30" disabled title="Salin Kode HTML">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                             </button>
-                            <button id="btnOpen" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition disabled:opacity-30" disabled title="Buka di Tab Baru">
+                            <button id="btnOpen" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition disabled:opacity-30" disabled title="Buka di Tab Baru">
                                 <i data-lucide="external-link" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -444,6 +483,7 @@
         const btnGithubLogin = document.getElementById("btnGithubLogin");
         const userProfileBadge = document.getElementById("userProfileBadge");
         const userInitial = document.getElementById("userInitial");
+        const globalNeuronWidget = document.getElementById("globalNeuronWidget");
         const globalNeuronText = document.getElementById("globalNeuronText");
         const premiumNeuronWidget = document.getElementById("premiumNeuronWidget");
         const premiumNeuronText = document.getElementById("premiumNeuronText");
@@ -460,10 +500,34 @@
         const transactionHistorySection = document.getElementById("transactionHistorySection");
         const transactionTableBody = document.getElementById("transactionTableBody");
 
+        // Profile Dropdown Elements
+        const profileDropdown = document.getElementById("profileDropdown");
+        const headerUsername = document.getElementById("headerUsername");
+        const dropdownUsername = document.getElementById("dropdownUsername");
+        const dropdownInitial = document.getElementById("dropdownInitial");
+        const dropdownPremiumBalance = document.getElementById("dropdownPremiumBalance");
+        const dropdownFreeBalance = document.getElementById("dropdownFreeBalance");
+
         // State
         let currentGeneratedHTML = "";
         const NEURON_DAILY_LIMIT = 10000;
         let paypalButtonsInitialized = false;
+
+        // ================================================================
+        //  PROFILE DROPDOWN CONTROLLERS (Twitter style)
+        // ================================================================
+
+        function toggleProfileDropdown() {
+            profileDropdown.classList.toggle("hidden");
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener("click", function(e) {
+            const authContainer = document.getElementById("authContainer");
+            if (authContainer && !authContainer.contains(e.target)) {
+                profileDropdown.classList.add("hidden");
+            }
+        });
 
         // ================================================================
         //  HYBRID AUTH: SAAS FETCH WITH BEARER HEADER
@@ -474,7 +538,6 @@
             if (!options.headers) options.headers = {};
             if (!options.headers['Content-Type']) options.headers['Content-Type'] = 'application/json';
             
-            // Baca token dari localStorage
             const localToken = localStorage.getItem("auth_token");
             if (localToken) {
                 options.headers['Authorization'] = `Bearer ${localToken}`;
@@ -502,18 +565,29 @@
                     if (isLoggedIn) {
                         btnGithubLogin.classList.add("hidden");
                         userProfileBadge.classList.remove("hidden");
-                        userInitial.innerText = data.user.username.substring(0, 2).toUpperCase();
-                        navDashboardLink.classList.remove("hidden");
-                        dashboardSection.classList.remove("hidden");
-                        btnSaveToCloud.classList.remove("hidden");
-                        premiumNeuronWidget.classList.remove("hidden");
-                        premiumNeuronText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID");
+                        globalNeuronWidget.classList.remove("hidden");
+                        
+                        const initials = data.user.username.substring(0, 2).toUpperCase();
+                        userInitial.innerText = initials;
+                        dropdownInitial.innerText = initials;
+                        headerUsername.innerText = data.user.username;
+                        dropdownUsername.innerText = data.user.username;
+
+                        // Set info dropdown Twitter-style
+                        dropdownPremiumBalance.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID") + " Neurons";
+                        const freeRemaining = NEURON_DAILY_LIMIT - Math.min(Math.max(0, data.freeUsage), NEURON_DAILY_LIMIT);
+                        dropdownFreeBalance.innerText = Math.round(freeRemaining).toLocaleString("id-ID") + " Neurons";
+                        
                         dashboardPremiumText.innerText = Math.round(data.user.premiumBalance).toLocaleString("id-ID") + " Neurons";
                         
-                        // Sembunyikan Pesan Tamu & Render Tombol PayPal
+                        // User login: Tampilkan Tombol Paypal, Sembunyikan Pesan Tamu
                         document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.add("hidden"));
                         document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.remove("hidden"));
                         
+                        navDashboardLink.classList.remove("hidden");
+                        dashboardSection.classList.remove("hidden");
+                        btnSaveToCloud.classList.remove("hidden");
+
                         if (!paypalButtonsInitialized) {
                             initPayPalButtons();
                         }
@@ -544,10 +618,10 @@
         function resetToGuest() {
             btnGithubLogin.classList.remove("hidden");
             userProfileBadge.classList.add("hidden");
+            globalNeuronWidget.classList.add("hidden");
             navDashboardLink.classList.add("hidden");
             dashboardSection.classList.add("hidden");
             btnSaveToCloud.classList.add("hidden");
-            premiumNeuronWidget.classList.add("hidden");
             
             document.querySelectorAll(".guest-pricing-msg").forEach(msg => msg.classList.remove("hidden"));
             document.querySelectorAll(".paypal-button-container").forEach(btn => btn.classList.add("hidden"));
@@ -585,7 +659,6 @@
 
         async function handleGithubLogin() {
             try {
-                // Catat domain frontend aktif tempat user berada saat ini
                 const localUrl = window.location.origin + window.location.pathname;
                 const initResp = await fetch(`${API_BASE_URL}/api/auth/github?frontend_url=${encodeURIComponent(localUrl)}`);
                 const data = await initResp.json();
@@ -599,7 +672,6 @@
         }
 
         function handleLogout() {
-            // Hapus token di lokal browser
             localStorage.removeItem("auth_token");
             fetch(`${API_BASE_URL}/api/logout`, {
                 method: 'POST',
@@ -610,7 +682,7 @@
         }
 
         // ================================================================
-        //  PORTFOLIO MANAGEMENT
+        //  PORTFOLIO MANAGEMENT (R2 & KV)
         // ================================================================
 
         async function saveProjectToCloud() {
@@ -644,12 +716,17 @@
                 if (res.ok) {
                     const data = await res.json();
                     projectsGrid.innerHTML = "";
+                    const token = localStorage.getItem("auth_token") || "";
+                    
                     if (data.projects && data.projects.length > 0) {
                         noProjectsPlaceholder.classList.add("hidden");
                         data.projects.forEach(proj => {
                             const sizeKb = (proj.size / 1024).toFixed(1);
                             const card = document.createElement("div");
                             card.className = "glass-panel p-5 rounded-2xl flex flex-col justify-between border-slate-800 hover:border-indigo-500/40 transition";
+                            // Tautkan token JWT di URL "Open Live" agar bypass otorisasi cookie tab baru browser sukses 100%
+                            const liveLink = `${API_BASE_URL}/api/projects/view?id=${proj.id}&token=${encodeURIComponent(token)}`;
+                            
                             card.innerHTML = `
                                 <div>
                                     <div class="flex items-center justify-between mb-3 text-xs">
@@ -659,7 +736,7 @@
                                     <h4 class="text-sm font-bold text-white truncate" title="${proj.targetUrl}">${proj.targetUrl.replace(/^https?:\/\//i, '')}</h4>
                                 </div>
                                 <div class="flex gap-2 mt-4 pt-4 border-t border-slate-900">
-                                    <a href="${API_BASE_URL}/api/projects/view?id=${proj.id}" target="_blank" class="flex-1 text-center py-2 bg-slate-900 border border-slate-800 rounded-xl hover:text-white text-xs transition">
+                                    <a href="${liveLink}" target="_blank" class="flex-1 text-center py-2 bg-slate-900 border border-slate-800 rounded-xl hover:text-white hover:bg-slate-800 text-xs transition font-semibold">
                                         Open Live
                                     </a>
                                     <button onclick="deleteCloudProject('${proj.id}')" class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 rounded-xl transition">
@@ -901,14 +978,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const tokenParam = urlParams.get("token");
         
-        // Jika ada parameter token di URL redirect callback, amankan ke localStorage
         if (tokenParam) {
             localStorage.setItem("auth_token", tokenParam);
-            // Bersihkan parameter dari URL agar browser tetap rapi & bersih dari token JWT
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Jalankan fetch status awal menggunakan Hybrid Token
         fetchNeuronUsage();
 
         document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
