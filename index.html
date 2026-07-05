@@ -120,7 +120,7 @@
                                 </div>
                                 <div class="truncate">
                                     <h4 class="text-sm font-bold text-white truncate" id="dropdownUsername">Username</h4>
-                                    <!-- PERBAIKAN: Label tingkatan dinamis (Pro vs Free) -->
+                                    <!-- Label tingkatan dinamis (Pro vs Free) -->
                                     <span id="userTierBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-500/10 text-slate-400 text-[9px] font-extrabold uppercase border border-slate-500/20">
                                         <i data-lucide="crown" class="w-2.5 h-2.5 fill-current"></i> <span id="userTierText">Free Member</span>
                                     </span>
@@ -576,7 +576,7 @@
                         headerUsername.innerText = data.user.username;
                         dropdownUsername.innerText = data.user.username;
 
-                        // PERBAIKAN: Tampilkan Badge Pro/Free yang dinamis dan sesuai status aslinya
+                        // Tampilkan Badge Pro/Free yang dinamis dan sesuai status aslinya
                         if (data.user.isPro) {
                             userTierBadge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[9px] font-extrabold uppercase border border-amber-500/20";
                             userTierText.innerText = "Pro Member";
@@ -909,7 +909,8 @@
 
                 if (!response.ok) {
                     const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.message || `HTTP ${response.status}`);
+                    // PERBAIKAN: Baca errData.error terlebih dahulu agar pesan error dari backend tampil dengan baik
+                    throw new Error(errData.error || errData.message || `HTTP ${response.status}`);
                 }
 
                 setTimeout(fetchNeuronUsage, 1000);
